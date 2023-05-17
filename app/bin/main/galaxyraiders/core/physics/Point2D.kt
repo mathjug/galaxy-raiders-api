@@ -1,5 +1,4 @@
 package galaxyraiders.core.physics
-import kotlin.math.abs
 
 data class Point2D(val x: Double, val y: Double) {
   operator fun plus(p: Point2D): Point2D {
@@ -19,7 +18,7 @@ data class Point2D(val x: Double, val y: Double) {
   }
 
   fun impactVector(p: Point2D): Vector2D {
-    return Vector2D(abs(x - p.x), abs(y - p.y))
+    return Vector2D(Math.abs(x - p.x), Math.abs(y - p.y))
   }
 
   fun impactDirection(p: Point2D): Vector2D {
