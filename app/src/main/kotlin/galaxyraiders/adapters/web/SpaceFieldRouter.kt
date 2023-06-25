@@ -8,12 +8,14 @@ import galaxyraiders.ports.ui.Visualizer
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.EndpointGroup
 import io.javalin.http.Context
+import galaxyraiders.core.game.Explosion
 
 class SpaceFieldRouter : Router, Visualizer {
   data class SpaceFieldDTO(
     val ship: SpaceShip,
     val asteroids: List<Asteroid>,
     val missiles: List<Missile>,
+    val explosions: List<Explosion>,
   )
 
   var dto: SpaceFieldDTO? = null
@@ -34,6 +36,7 @@ class SpaceFieldRouter : Router, Visualizer {
       ship = field.ship,
       asteroids = field.asteroids,
       missiles = field.missiles,
+      explosions = field.explosions,
     )
   }
 }
