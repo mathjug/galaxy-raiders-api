@@ -18,7 +18,7 @@ class Explosion(
   
   fun comeca(){
     tempo_de_vida = tempo_de_vida + 1
-    if(tempo_de_vida > 10){
+    if(tempo_de_vida > 15){
       isTriggered = true
     }
   }
