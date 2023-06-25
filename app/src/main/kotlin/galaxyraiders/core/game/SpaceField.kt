@@ -64,8 +64,8 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     this.asteroids += this.createAsteroidWithRandomProperties()
   }
 
-  fun generateExplosion(asteroid: Asteroid, missile: Missile) {
-    this.explosions += this.createExplosion(asteroid.center)
+  fun generateExplosion(pos: Point2D) {
+    this.explosions += this.createExplosion(pos)
   }
 
   fun iniciateExplosion(){
@@ -87,6 +87,18 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   fun trimExplosions() {
     this.explosions = this.explosions.filter {
       ! it.isTriggered
+    }
+  }
+
+  fun deleteMissile(missile: Missile){
+    this.missiles = this.missiles.filter {
+      it != missile
+    }
+  }
+
+  fun deleteAsteroid(asteroid: Asteroid){
+    this.asteroids = this.asteroids.filter {
+      it != asteroid
     }
   }
 
@@ -128,8 +140,8 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     return Explosion(
       initialPosition = pos,
       initialVelocity = Vector2D(dx = 0.0, dy = 0.0),
-      radius = 1.0,
-      mass = 1.0,
+      radius = 2.5,
+      mass = 0.0,
     )
   }
 
