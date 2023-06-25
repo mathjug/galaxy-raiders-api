@@ -1,0 +1,26 @@
+{"Jogos": [
+    {
+        "Hora": "04:04:32 PM",
+        "Data": "25 Jun 2023",
+        "Quantidade de Asteroides": 13,
+        "Pontuação Final": 260
+    },
+    {
+        "Hora": "04:07:33 PM",
+        "Data": "25 Jun 2023",
+        "Quantidade de Asteroides": 15,
+        "Pontuação Final": 300
+    },
+    {
+        "Hora": "04:09:59 PM",
+        "Data": "25 Jun 2023",
+        "Quantidade de Asteroides": 9,
+        "Pontuação Final": 180
+    },
+    {
+        "Hora": "04:11:45 PM",
+        "Data": "25 Jun 2023",
+        "Quantidade de Asteroides": 23,
+        "Pontuação Final": 460
+    }
+]}
