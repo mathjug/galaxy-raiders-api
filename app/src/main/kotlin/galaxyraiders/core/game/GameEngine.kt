@@ -11,6 +11,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONException
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.io.FileWriter
 import java.io.IOException
@@ -46,8 +47,9 @@ class GameEngine(
 
   var playing = true
 
-  val date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
-  val time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss a"))
+  val timeZone = ZoneId.of("America/Sao_Paulo")  
+  val date = LocalDateTime.now(timeZone).format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+  val time = LocalDateTime.now(timeZone).format(DateTimeFormatter.ofPattern("hh:mm:ss a"))
   var fileNameScoreboard = "src/main/kotlin/galaxyraiders/core/score/Scoreboard.json"
   var fileNameLeaderboard = "src/main/kotlin/galaxyraiders/core/score/Leaderboard.json"
   var scoreTotal: Int = 0
@@ -298,7 +300,7 @@ fun generateLeaderboard(fileName: String, date: String, time: String, points: In
 
     try {
         val jsonFromFile = getJSONfromFile(fileName)
-        var gamesArray = JSONArray()
+        val gamesArray: JSONArray
         try {
             gamesArray = jsonFromFile.getJSONArray("Jogos")
         } catch (e: JSONException) {
