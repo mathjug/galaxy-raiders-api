@@ -16,7 +16,7 @@ class Explosion(
   var life_time: Int = 0
     private set
   
-  fun comeca(){
+  fun incrementTime(){
     life_time = life_time + 1
     if(life_time > 15){
       isTriggered = true

@@ -132,8 +132,8 @@ class GameEngine(
   private fun UpdateScore(score: Int){
     scoreTotal = scoreTotal + score
     asteroidTotal = asteroidTotal + 1
-    generateScoreboard(fileNameScoreboard, date, time, score, asteroidTotal)
-    generateLeaderboard(fileNameLeaderboard, date, time, score, asteroidTotal)
+    generateScoreboard(fileNameScoreboard, date, time, scoreTotal, asteroidTotal)
+    generateLeaderboard(fileNameLeaderboard, date, time, scoreTotal, asteroidTotal)
   }
 
   fun setTimerExplosion(){

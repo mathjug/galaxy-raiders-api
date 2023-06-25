@@ -69,7 +69,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   }
 
   fun iniciateExplosion(){
-    this.explosions.forEach { it.comeca() }
+    this.explosions.forEach { it.incrementTime() }
   }
 
   fun trimMissiles() {
@@ -141,7 +141,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
       initialPosition = pos,
       initialVelocity = Vector2D(dx = 0.0, dy = 0.0),
       radius = 2.5,
-      mass = 0.0,
+      mass = 1.0,
     )
   }
 
