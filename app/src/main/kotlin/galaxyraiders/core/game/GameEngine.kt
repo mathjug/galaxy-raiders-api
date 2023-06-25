@@ -7,6 +7,17 @@ import galaxyraiders.ports.ui.Controller.PlayerCommand
 import galaxyraiders.ports.ui.Visualizer
 import kotlin.system.measureTimeMillis
 
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.io.FileWriter
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.io.File
+
 const val MILLISECONDS_PER_SECOND: Int = 1000
 
 object GameEngineConfig {
@@ -34,6 +45,13 @@ class GameEngine(
   )
 
   var playing = true
+
+  val date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+  val time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss a"))
+  var fileNameScoreboard = "src/main/kotlin/galaxyraiders/core/score/Scoreboard.json"
+  var fileNameLeaderboard = "src/main/kotlin/galaxyraiders/core/score/Leaderboard.json"
+  var scoreTotal: Int = 0
+  var asteroidTotal: Int = 0
 
   fun execute() {
     while (true) {
@@ -93,10 +111,18 @@ class GameEngine(
         if(first is Missile && second is Asteroid){
           //precisa deletar o missile e o asteroid
           this.field.generateExplosion(second, first)
+          scoreTotal = scoreTotal + 20
+          asteroidTotal = asteroidTotal + 1
+          generateScoreboard(fileNameScoreboard, date, time, scoreTotal, asteroidTotal)
+          generateLeaderboard(fileNameLeaderboard, date, time, scoreTotal, asteroidTotal)
         }
         else if(first is Asteroid && second is Missile){
           //precisa deletar o missile e o asteroid
           this.field.generateExplosion(first, second)
+          scoreTotal = scoreTotal + 20
+          asteroidTotal = asteroidTotal + 1
+          generateScoreboard(fileNameScoreboard, date, time, scoreTotal, asteroidTotal)
+          generateLeaderboard(fileNameLeaderboard, date, time, scoreTotal, asteroidTotal)
         }
       }
     }
@@ -128,6 +154,156 @@ class GameEngine(
 
   fun renderSpaceField() {
     this.visualizer.renderSpaceField(this.field)
+  }
+
+  fun findPosition(arrayPositions: JSONArray, newPoints: Int): Int {
+    for (i in 0 until arrayPositions.length()) {
+        val position: JSONObject = arrayPositions.getJSONObject(i)
+        val oldPoints: Int? = position.optInt("Pontuação Final")
+        if (oldPoints != null) {
+            if (newPoints > oldPoints) {
+                return i
+            }
+        }
+    }
+    return arrayPositions.length()
+}
+
+fun createJSONObject(date: String, time: String, points: Int, asteroids: Int): JSONObject {
+    val jsonObject = JSONObject()
+
+    jsonObject.put("Data", date)
+    jsonObject.put("Hora", time)
+    jsonObject.put("Pontuação Final", points)
+    jsonObject.put("Quantidade de Asteroides", asteroids)
+
+    return jsonObject
+}
+
+fun getJSONfromFile(fileName: String):  JSONObject {
+    var json = JSONObject()
+    try {
+        val file = File(fileName)
+        if (!file.exists())
+            file.createNewFile()
+        var content = String(Files.readAllBytes(Paths.get(fileName)))
+
+        try {
+            json = JSONObject(content)
+        } catch (e: JSONException) {}
+
+        if (!json.has("Jogos"))
+            json.put("Jogos", JSONArray())
+
+    } catch (e: IOException) {
+        println("An error occurred: ${e.message}")
+    }
+    return json
+}
+
+fun writeJSONToFile(fileName: String, json: JSONObject) {
+    try {
+        val writer = FileWriter(fileName)
+        writer.write(json.toString(4))
+        writer.close()
+    } catch (e: IOException) {
+        println("An error occurred: ${e.message}")
+    }
+}
+
+fun updateArrayGamesScoreboard(gamesArray: JSONArray, newJSONObject: JSONObject) {
+    val newDate = newJSONObject.getString("Data")
+    val newHour = newJSONObject.getString("Hora")
+    if (gamesArray.length() > 0) {
+        val lastElement = gamesArray.getJSONObject(gamesArray.length() - 1)
+        val lastDate = lastElement.getString("Data")
+        val lastHour = lastElement.getString("Hora")
+        if (lastDate == newDate && lastHour == newHour)
+            gamesArray.put(gamesArray.length() - 1, newJSONObject)
+        else
+            gamesArray.put(newJSONObject)
+    }
+    else
+        gamesArray.put(newJSONObject)
+}
+
+fun generateScoreboard(fileName: String, date: String, time: String, points: Int, asteroids: Int) {
+    val jsonObject = createJSONObject(date, time, points, asteroids)
+    try {
+        val jsonFromFile = getJSONfromFile(fileName)
+        var gamesArray = jsonFromFile.getJSONArray("Jogos")
+        updateArrayGamesScoreboard(gamesArray, jsonObject)
+
+        jsonFromFile.put("Jogos", gamesArray)
+        writeJSONToFile(fileName, jsonFromFile)
+    } catch (e: IOException) {
+        println("An error occurred: ${e.message}")
+    } catch (e: JSONException) {
+        println("An error occurred: ${e.message}")
+    }
+}
+
+fun updateArrayGamesLeaderboard(gamesArray: JSONArray, newJSONObject: JSONObject): Int {
+  val newDate = newJSONObject.getString("Data")
+  val newHour = newJSONObject.getString("Hora")
+  for (i in 0 until gamesArray.length()) {
+      val element = gamesArray.getJSONObject(i)
+      val lastDate = element.getString("Data")
+      val lastHour = element.getString("Hora")
+      if (lastDate == newDate && lastHour == newHour) {
+          gamesArray.put(i, newJSONObject)
+          if (i == 0)
+              return 0
+          val newPoints = newJSONObject.getInt("Pontuação Final")
+          for (j in i - 1 downTo 0) {
+              val elementToMove = gamesArray.getJSONObject(j)
+              if (newPoints > elementToMove.getInt("Pontuação Final")) {
+                  gamesArray.put(j + 1, elementToMove)
+                  gamesArray.put(j, newJSONObject)
+              }
+          }
+          return 0
+      }
+  }
+  return 1
+}
+
+fun insertGameLeaderboard(gameToInsert: JSONObject, gamesArray: JSONArray) {
+    var gameToMove: JSONObject = gameToInsert
+    val position = findPosition(gamesArray, gameToMove.optInt("Pontuação Final"))
+    if (updateArrayGamesLeaderboard(gamesArray, gameToMove) != 0) {
+        var numberOfGames = gamesArray.length()
+        for (i in position until numberOfGames + 1) {
+            if (i < 3) {
+                var nextGame = JSONObject()
+                if (i < numberOfGames)
+                    nextGame = gamesArray.getJSONObject(i)
+                gamesArray.put(i, gameToMove)
+                gameToMove = nextGame
+            }
+        }
+    }
+}
+
+fun generateLeaderboard(fileName: String, date: String, time: String, points: Int, asteroids: Int) {
+    val gameToInsert = createJSONObject(date, time, points, asteroids)
+
+    try {
+        val jsonFromFile = getJSONfromFile(fileName)
+        var gamesArray = JSONArray()
+        try {
+            gamesArray = jsonFromFile.getJSONArray("Jogos")
+        } catch (e: JSONException) {
+            println("An error occurred: ${e.message}")
+            throw e
+        }
+        insertGameLeaderboard(gameToInsert, gamesArray)
+
+        jsonFromFile.put("Jogos", gamesArray)
+        writeJSONToFile(fileName, jsonFromFile)
+    } catch (e: IOException) {
+        println("An error occurred: ${e.message}")
+    }
   }
 }
 

@@ -64,6 +64,10 @@ dependencies {
 
   // Allow JUnit 5 parameterized tests
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+
+  implementation("org.json:json:20210307")
+  implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+  implementation("com.google.code.gson:gson:2.8.9")
 }
 
 application {
