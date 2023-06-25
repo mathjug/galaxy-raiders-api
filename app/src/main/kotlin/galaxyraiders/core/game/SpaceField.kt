@@ -38,8 +38,11 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   var asteroids: List<Asteroid> = emptyList()
     private set
 
+  var explosions: List<Explosion> = emptyList()
+    private set 
+
   val spaceObjects: List<SpaceObject>
-    get() = listOf(this.ship) + this.missiles + this.asteroids
+    get() = listOf(this.ship) + this.missiles + this.asteroids + this.explosions
 
   fun moveShip() {
     this.ship.move(boundaryX, boundaryY)
@@ -61,15 +64,29 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     this.asteroids += this.createAsteroidWithRandomProperties()
   }
 
+  fun generateExplosion(asteroid: Asteroid, missile: Missile) {
+    this.explosions += this.createExplosion(asteroid.center)
+  }
+
+  fun iniciateExplosion(){
+    this.explosions.forEach { it.comeca() }
+  }
+
   fun trimMissiles() {
     this.missiles = this.missiles.filter {
       it.inBoundaries(this.boundaryX, this.boundaryY)
     }
   }
 
-  fun trimAsteroids() {
+  fun trimAsteroids() { 
     this.asteroids = this.asteroids.filter {
       it.inBoundaries(this.boundaryX, this.boundaryY)
+    }
+  }
+
+  fun trimExplosions() {
+    this.explosions = this.explosions.filter {
+      ! it.isTriggered
     }
   }
 
@@ -105,6 +122,15 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
 
   private fun defineMissileVelocity(): Vector2D {
     return Vector2D(dx = 0.0, dy = 1.0)
+  }
+
+  private fun createExplosion(pos: Point2D): Explosion {
+    return Explosion(
+      initialPosition = pos,
+      initialVelocity = Vector2D(dx = 0.0, dy = 0.0),
+      radius = 1.0,
+      mass = 1.0,
+    )
   }
 
   private fun createAsteroidWithRandomProperties(): Asteroid {

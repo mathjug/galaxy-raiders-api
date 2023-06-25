@@ -82,6 +82,7 @@ class GameEngine(
     this.moveSpaceObjects()
     this.trimSpaceObjects()
     this.generateAsteroids()
+    this.setTimerExplosion()
   }
 
   fun handleCollisions() {
@@ -89,8 +90,20 @@ class GameEngine(
         (first, second) ->
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
+        if(first is Missile && second is Asteroid){
+          //precisa deletar o missile e o asteroid
+          this.field.generateExplosion(second, first)
+        }
+        else if(first is Asteroid && second is Missile){
+          //precisa deletar o missile e o asteroid
+          this.field.generateExplosion(first, second)
+        }
       }
     }
+  }
+
+  fun setTimerExplosion(){
+    this.field.iniciateExplosion()
   }
 
   fun moveSpaceObjects() {
@@ -102,6 +115,7 @@ class GameEngine(
   fun trimSpaceObjects() {
     this.field.trimAsteroids()
     this.field.trimMissiles()
+    this.field.trimExplosions()
   }
 
   fun generateAsteroids() {
