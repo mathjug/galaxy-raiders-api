@@ -109,23 +109,31 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if(first is Missile && second is Asteroid){
-          //precisa deletar o missile e o asteroid
-          this.field.generateExplosion(second, first)
-          scoreTotal = scoreTotal + 20
-          asteroidTotal = asteroidTotal + 1
-          generateScoreboard(fileNameScoreboard, date, time, scoreTotal, asteroidTotal)
-          generateLeaderboard(fileNameLeaderboard, date, time, scoreTotal, asteroidTotal)
+          this.field.generateExplosion(second.center)
+          this.UpdateScore(CalculateScore(second.mass, second.radius))
+          this.field.deleteAsteroid(second)
+          this.field.deleteMissile(first)
         }
         else if(first is Asteroid && second is Missile){
-          //precisa deletar o missile e o asteroid
-          this.field.generateExplosion(first, second)
-          scoreTotal = scoreTotal + 20
-          asteroidTotal = asteroidTotal + 1
-          generateScoreboard(fileNameScoreboard, date, time, scoreTotal, asteroidTotal)
-          generateLeaderboard(fileNameLeaderboard, date, time, scoreTotal, asteroidTotal)
+          this.field.generateExplosion(first.center)
+          this.UpdateScore(CalculateScore(first.mass, first.radius))
+          this.field.deleteAsteroid(first)
+          this.field.deleteMissile(second)
         }
       }
     }
+  }
+
+  private fun CalculateScore(mass: Double, radius: Double): Int {
+    val result = mass / radius
+    return result.toInt()
+  }
+
+  private fun UpdateScore(score: Int){
+    scoreTotal = scoreTotal + score
+    asteroidTotal = asteroidTotal + 1
+    generateScoreboard(fileNameScoreboard, date, time, score, asteroidTotal)
+    generateLeaderboard(fileNameLeaderboard, date, time, score, asteroidTotal)
   }
 
   fun setTimerExplosion(){
