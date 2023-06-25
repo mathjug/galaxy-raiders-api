@@ -13,12 +13,12 @@ class Explosion(
 
   var isTriggered: Boolean = false
   
-  var tempo_de_vida: Int = 0
+  var life_time: Int = 0
     private set
   
   fun comeca(){
-    tempo_de_vida = tempo_de_vida + 1
-    if(tempo_de_vida > 15){
+    life_time = life_time + 1
+    if(life_time > 15){
       isTriggered = true
     }
   }
